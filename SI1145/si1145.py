@@ -91,7 +91,7 @@ class SI1145(si114x.SI114X):
                 ''' read gain parameters
 
                 returns a tuple (gain, rng, rec_period, align)
-                the prox align is not decoded'''
+                the PS1 align is not decoded'''
                 
                 if chan=="PS1" :
                         align = self.readParam(si114x.PARAM_PSENCODE) #contains all 3 ps vals
@@ -110,7 +110,7 @@ class SI1145(si114x.SI114X):
                 return gain, rng, rec_period, align
 
         def chan_sel_encode(self, *pargs):
-                ''' encode channels for CLIST'''
+                ''' encode channels for CHLIST'''
                 
                 channel = 0
                 for i in pargs:
@@ -231,15 +231,13 @@ class SI1145(si114x.SI114X):
                 both must be set to enable interupt pin to go live
 
                 Returns tuple (Infconfig, int_enable)'''
-                si114x.REG_IRQEN_PS1EVERYSAMPLE
+                
                 self.writeReg(si114x.REG_INTCFG, int_cfg)
                 self.writeReg(si114x.REG_IRQEN, int_en_ALS | int_en_PS1)
                 return self.readInt_en()
 
         def readSensor(self, chan):
                 '''returns the sensor assignment for configurable channels
-
-                (channel, sensor selected, bool(enable status))
 
                 Sensor settings:  0x00 Small IR photodiode
                                   0x02 Visible photodiode
@@ -249,10 +247,12 @@ class SI1145(si114x.SI114X):
                                   0x25 Gnd voltage (reference for voltage and temp)
                                   0x65 temperature need to subtract gnd voltage
                                   0x75 Vdd voltage need to subtract gnd voltage
+
+                returns (channel, sensor selected, bool(enabled status))
                 '''
                 
                 if chan == 'PS1' :
-                        channel = si114x.PARAM_PS1ADCMUX
+                        channel = si114x.PARAM_PS1ADCMUX 
                         mode_enable = (self.readParam(si114x.PARAM_PSADCMISC) & 0b100) and \
                                   (self.readParam(si114x.PARAM_CHLIST) & si114x.PARAM_CHLIST_ENPS1)
                 elif chan == "Raw" :
@@ -274,11 +274,16 @@ class SI1145(si114x.SI114X):
                                 
         # select sensor for the configurable channels
         def selectSensor (self, chan, sensor):
-                '''returns the sensor setting
+                '''Selects the sensor for the configurable channels.
+                No error checking done.  Channel must be enabled seperately.
 
                 (channel, sensor)
                 
-                Raw and PS1 are mutually exclusive
+                Allowable channels: PS1 -- small and large IR                                         
+                                    Raw -- all sensors
+                                    Aux -- temp and Vdd
+                                    IR  -- small and large IR
+                                    Raw and PS1 are mutually exclusive
 
                 Sensor settings:  0x00 Small IR photodiode
                                   0x02 Visible photodiode
@@ -288,11 +293,7 @@ class SI1145(si114x.SI114X):
                                   0x65 temperature need to subtract gnd voltage
                                   0x75 Vdd voltage need to subtract gnd voltage
 
-                Allowable channels: PS1 -- small and large IR                                         
-                                    Raw  -- all sensors
-                                    Aux  -- temp and Vdd
-                                    IR   -- small and large IR
-                                    '''
+                returns (channel, sensor setting)'''
                 
                 if chan == 'PS1':
                         x = self.readParam(si114x.PARAM_PSADCMISC)
@@ -301,8 +302,7 @@ class SI1145(si114x.SI114X):
                         self.writeParam(si114x.PARAM_PS1ADCMUX, sensor)
                 elif chan == 'Raw':
                         x = self.readParam(si114x.PARAM_PSADCMISC) & 0b11111011 # 0 mode bit
-                        self.writeParam(si114x.PARAM_PSADCMISC, x |
-                                   si114x.PARAM_PSADCMISC_PSMODE_RAW)
+                        self.writeParam(si114x.PARAM_PSADCMISC, x)
                         self.writeParam(si114x.PARAM_PS1ADCMUX, sensor)
                 elif chan == 'Aux': self.writeParam(si114x.PARAM_AUXADCMUX, sensor)
                 elif chan == 'IR': self.writeParam(si114x.PARAM_ALSIRADCMUX, sensor)
@@ -311,7 +311,7 @@ class SI1145(si114x.SI114X):
                 
         def setup_led(self, led_current = 0x03, sensor= 3):
                 '''sets up LED current and select which sensor to use for proximty
-                measurements.
+                measurements.  The 1145 only has 1 LED available.
 
                 Defaults to ca. 22 mA.   0 = 0 mA to 0x0f = ca. 359 mA,
                 !!!!!Use with caution!!!!!!!
@@ -398,7 +398,7 @@ class SI1145(si114x.SI114X):
         
   
         def readLux(self,  coef = lux_coef['Ref'][:2], readdark=False):
-                """Returns Lux Calculations
+                """Returns Lux Calculation
 
                 ( (visible_coefficient, IR_coefficient), read dark count )
                 
