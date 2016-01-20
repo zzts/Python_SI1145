@@ -186,7 +186,7 @@ class SI114X(object):
         # device reset
         def _reset(self):
                 ''' zeros measurement rate, turns off interupts, sends
-         SI1145_       software reset command and writes hardware key'''
+                 SI114x software reset command and writes hardware key'''
                 
                 self._device.write8(REG_MEASRATE0, 0)
                 self._device.write8(REG_MEASRATE1, 0)
@@ -208,7 +208,7 @@ class SI114X(object):
                 (parameter, value)
                 '''
 
-                ''' Returns Parameter   written '''
+                ''' Returns Parameter written '''
                 
                 self._device.write8(REG_PARAMWR, v)
                 self._device.write8(REG_COMMAND, p | PARAM_SET)
