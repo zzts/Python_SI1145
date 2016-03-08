@@ -1,7 +1,7 @@
 Python_SI1145
 =============
 
-Python library for accessing the SI1145 temperature sensor on a Raspberry Pi.
+Python library for accessing the SI1145 light sensor on a Raspberry Pi.
 
 Designed specifically to work with the Adafruit SI1145 sensors ----> https://www.adafruit.com/product/1777
 
