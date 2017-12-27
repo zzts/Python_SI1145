@@ -1,7 +1,11 @@
 #!/usr/bin/python
 
 
-# Author: Joe Gutting
+# Author: Khill NX7H based on the work of Joe Gutting
+# This is a simple rewrite to use as a class for the extensive changes in the Si1145.py.  It allows for
+# the generation of SI1146 and 1147 specific code.
+# Eventually the common code will be move from the SI1145 to this file.
+
 # With use of Adafruit SI1145 library for Arduino, Adafruit_GPIO.I2C & BMP Library by Tony DiCola
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -11,10 +15,6 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# Modified by Khill NX7H
-
-
-
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
